@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AVICA Demos</title>
+<meta name="description" content="Terminal recordings of the AVICA pipeline — automated VLBI calibration in CASA, from raw FITS-IDI to calibrated data.">
+<meta property="og:title" content="AVICA Demos">
+<meta property="og:description" content="Nine terminal recordings of the AVICA VLBI pipeline, from installation to reading pipeline results.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230c141c'/%3E%3Cpath d='M7 21.5 12.2 10h2.1l5.2 11.5h-2.3l-1.2-2.8h-5.4l-1.2 2.8H7Zm4.4-4.7h3.8l-1.9-4.4-1.9 4.4Z' fill='%23e8a33d'/%3E%3Ccircle cx='23.5' cy='12' r='2' fill='%2363b4d4'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="assets/asciinema-player.css">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<header class="masthead">
+  <div class="masthead__inner">
+    <a class="wordmark" href="./"><b>AVICA</b> <span>Demos</span></a>
+    <nav class="masthead__links">
+      <a href="#demos">Demos</a>
+      <a href="https://avica.readthedocs.io/en/latest/">Docs</a>
+      <a href="https://pypi.org/project/avica/">PyPI</a>
+      <a href="https://github.com/avikhagol/avica">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <section class="wrap hero">
+    <p class="hero__badge">Accepted for publication in Astronomy &amp; Astrophysics</p>
+    <h1>Automated VLBI pipeline <em>in CASA</em></h1>
+    <p class="hero__lede">
+      AVICA takes raw VLBI FITS-IDI files through a complete calibration reduction —
+      preprocessing, conversion to a Measurement Set, phase shifting, averaging, SNR
+      estimation and rPICARD calibration — driven by one configuration file.
+      <strong>The nine recordings below are the real terminal sessions</strong>, not slides.
+    </p>
+
+    <div class="install">
+      <div class="install__bar">
+        <span>Install the full stack</span>
+        <button class="copy" type="button" data-copy="curl -fsSL https://raw.githubusercontent.com/avikhagol/avica/main/install.sh -o install.sh&#10;bash install.sh&#10;source &quot;$HOME/.local/share/avica-stack/env.sh&quot;">Copy</button>
+      </div>
+<pre><span class="p">$</span> curl -fsSL https://raw.githubusercontent.com/avikhagol/avica/main/install.sh -o install.sh
+<span class="p">$</span> bash install.sh
+<span class="p">$</span> source "$HOME/.local/share/avica-stack/env.sh"</pre>
+    </div>
+  </section>
+
+  <section class="wrap chain">
+    <div class="chain__head">
+      <p class="eyebrow">Default pipeline</p>
+      <p>Nine steps, run end to end or named individually.</p>
+    </div>
+    <div class="chain__steps">
+      <code>preprocess_fitsidi</code><i>→</i><code>fits_to_ms</code><i>→</i><code>phaseshift</code><i>→</i><code>avica_avg</code><i>→</i><code>avicameta_ms</code><i>→</i><code>avica_snr</code><i>→</i><code>avica_fill_input</code><i>→</i><code>avica_split_ms</code><i>→</i><code>rpicard</code>
+    </div>
+  </section>
+
+  <section class="console" id="demos">
+    <div class="console__inner">
+
+      <aside>
+        <h2 class="rail__title">Nine recordings</h2>
+        <p class="rail__sub">In order, installation through to reading results.</p>
+        <div id="rail"></div>
+      </aside>
+
+      <div class="stage">
+        <div class="stage__head">
+          <div>
+            <h2 class="stage__title" id="s-title">Loading…</h2>
+            <p class="stage__blurb" id="s-blurb"></p>
+          </div>
+          <div class="chips" id="s-chips"></div>
+        </div>
+
+        <div class="bezel">
+          <div class="bezel__bar">
+            <span class="dots"><i></i><i></i><i></i></span>
+            <span class="bezel__name" id="s-name">avica</span>
+            <span class="bezel__runtime" id="s-runtime"></span>
+          </div>
+          <div id="player"></div>
+        </div>
+
+        <div class="cmd">
+          <code id="s-cmd"></code>
+          <button class="copy" type="button" id="s-copy">Copy</button>
+        </div>
+
+        <div class="stage__foot">
+          <span id="s-note"></span>
+          <span class="nav">
+            <button type="button" id="s-prev">← Prev</button>
+            <button type="button" id="s-next">Next →</button>
+          </span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="wrap reqs">
+    <p class="eyebrow">Before you start</p>
+    <h2>What the demos assume</h2>
+    <div class="reqs__grid">
+      <dl class="req">
+        <dt>System</dt>
+        <dd>Ubuntu 18.04+, Debian 10+, or RHEL/CentOS 8+, with Python <code>&ge; 3.9</code>. The pipeline itself runs on Python 3.10.</dd>
+      </dl>
+      <dl class="req">
+        <dt>Calibration backend</dt>
+        <dd>Demos 04–09 need working <a href="https://casa.nrao.edu/">CASA</a> and <a href="https://bitbucket.org/M_Janssen/picard/src/master/">rPICARD</a> installations. <code>install.sh</code> sets both up, or reuses an existing <code>picard</code> on your <code>PATH</code>.</dd>
+      </dl>
+      <dl class="req">
+        <dt>Data</dt>
+        <dd>A VLBI FITS-IDI dataset (<code>.uvfits</code>). Demos 01–03 need no data at all — follow those on any machine.</dd>
+      </dl>
+      <dl class="req">
+        <dt>Configuration</dt>
+        <dd>A single <code>avica.inp</code> file of <code>key=value</code> entries in your working directory. Demo 03 builds one from scratch.</dd>
+      </dl>
+    </div>
+  </section>
+
+  <footer class="wrap foot">
+    <div class="foot__links">
+      <a href="https://github.com/avikhagol/avica">Source on GitHub</a>
+      <a href="https://avica.readthedocs.io/en/latest/">Documentation</a>
+      <a href="https://pypi.org/project/avica/">Install from PyPI</a>
+      <a href="https://github.com/avikhagol/avica/blob/main/install.sh">install.sh</a>
+    </div>
+    <p>
+      Recorded with <a href="https://asciinema.org">asciinema</a> and played back with
+      asciinema-player. Long idle gaps are compressed during playback; each recording
+      shows its true wall-clock runtime above the terminal.
+    </p>
+    <p>
+      AVICA was developed within the “Search for Milli-Lenses” (SMILE) project, which has
+      received funding from the European Research Council (ERC) under the HORIZON ERC
+      Grants 2021 programme, grant agreement No. 101040021.
+    </p>
+  </footer>
+
+</main>
+
+<script src="assets/asciinema-player.min.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  var els = {
+    rail: document.getElementById("rail"),
+    title: document.getElementById("s-title"),
+    blurb: document.getElementById("s-blurb"),
+    chips: document.getElementById("s-chips"),
+    name: document.getElementById("s-name"),
+    runtime: document.getElementById("s-runtime"),
+    cmd: document.getElementById("s-cmd"),
+    copy: document.getElementById("s-copy"),
+    note: document.getElementById("s-note"),
+    prev: document.getElementById("s-prev"),
+    next: document.getElementById("s-next"),
+    mount: document.getElementById("player")
+  };
+
+  var manifest = null, demos = [], index = 0, player = null;
+
+  function flash(btn, text) {
+    var was = btn.textContent;
+    btn.textContent = text;
+    btn.dataset.done = "1";
+    setTimeout(function () {
+      btn.textContent = was;
+      delete btn.dataset.done;
+    }, 1400);
+  }
+
+  function copyText(text, btn) {
+    var done = function () { flash(btn, "Copied"); };
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(done, function () { flash(btn, "Failed"); });
+      return;
+    }
+    var ta = document.createElement("textarea");
+    ta.value = text;
+    ta.setAttribute("readonly", "");
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand("copy"); done(); }
+    catch (e) { flash(btn, "Failed"); }
+    document.body.removeChild(ta);
+  }
+
+  document.querySelectorAll("[data-copy]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      copyText(btn.getAttribute("data-copy"), btn);
+    });
+  });
+
+  function buildRail() {
+    var frag = document.createDocumentFragment();
+
+    manifest.groups.forEach(function (group) {
+      var members = demos.filter(function (d) { return d.group === group.name; });
+      if (!members.length) return;
+
+      var sec = document.createElement("section");
+      sec.className = "rail__group";
+
+      var label = document.createElement("p");
+      label.className = "rail__glabel";
+      label.textContent = group.name;
+      sec.appendChild(label);
+
+      var note = document.createElement("p");
+      note.className = "rail__gnote";
+      note.textContent = group.note;
+      sec.appendChild(note);
+
+      var list = document.createElement("ul");
+      list.className = "rail__list";
+
+      members.forEach(function (demo) {
+        var li = document.createElement("li");
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "demo";
+        btn.dataset.id = demo.id;
+        btn.innerHTML =
+          '<span class="demo__n">' + demo.n + '</span>' +
+          '<span class="demo__t"></span>' +
+          '<span class="demo__d">' + demo.playClock + '</span>';
+        btn.querySelector(".demo__t").textContent = demo.title;
+        btn.addEventListener("click", function () {
+          select(demos.indexOf(demo), true);
+        });
+        li.appendChild(btn);
+        list.appendChild(li);
+      });
+
+      sec.appendChild(list);
+      frag.appendChild(sec);
+    });
+
+    els.rail.textContent = "";
+    els.rail.appendChild(frag);
+  }
+
+  function select(i, scroll) {
+    if (i < 0 || i >= demos.length) return;
+    index = i;
+    var demo = demos[i];
+
+    els.rail.querySelectorAll(".demo").forEach(function (btn) {
+      if (btn.dataset.id === demo.id) btn.setAttribute("aria-current", "true");
+      else btn.removeAttribute("aria-current");
+    });
+
+    els.title.textContent = demo.n + " · " + demo.title;
+    els.blurb.textContent = demo.blurb;
+    els.name.textContent = "avica — " + demo.title.toLowerCase();
+    els.cmd.textContent = demo.command;
+
+    els.runtime.innerHTML = demo.trimmed
+      ? 'playback <b>' + demo.playClock + '</b> · actual runtime <b>' + demo.rawClock + '</b>'
+      : 'runtime <b>' + demo.rawClock + '</b>';
+
+    els.chips.textContent = "";
+    var chip = document.createElement("span");
+    chip.className = "chip" + (demo.data ? " chip--data" : "");
+    chip.textContent = demo.data ? "Needs data" : "No data needed";
+    els.chips.appendChild(chip);
+    var size = document.createElement("span");
+    size.className = "chip";
+    size.textContent = demo.cols + "×" + demo.rows;
+    els.chips.appendChild(size);
+
+    els.note.textContent = demo.trimmed
+      ? "Idle gaps trimmed to " + manifest.idleTimeLimit + "s for playback."
+      : "Played at recorded speed.";
+
+    els.prev.disabled = i === 0;
+    els.next.disabled = i === demos.length - 1;
+
+    if (player) { try { player.dispose(); } catch (e) {} player = null; }
+    els.mount.textContent = "";
+    player = AsciinemaPlayer.create(demo.cast, els.mount, {
+      cols: demo.cols,
+      rows: demo.rows,
+      fit: "width",
+      idleTimeLimit: manifest.idleTimeLimit,
+      poster: "npt:" + demo.posterAt,
+      preload: false,
+      theme: "asciinema"
+    });
+
+    if (history.replaceState) history.replaceState(null, "", "#" + demo.id);
+    if (scroll) {
+      var top = document.getElementById("demos").getBoundingClientRect().top;
+      if (top < -20) document.getElementById("demos").scrollIntoView({ block: "start" });
+    }
+  }
+
+  els.prev.addEventListener("click", function () { select(index - 1, true); });
+  els.next.addEventListener("click", function () { select(index + 1, true); });
+  els.copy.addEventListener("click", function () {
+    copyText(demos[index].command, els.copy);
+  });
+
+  document.addEventListener("keydown", function (e) {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    var tag = (e.target.tagName || "").toLowerCase();
+    if (tag === "input" || tag === "textarea") return;
+    if (e.key === "[") { select(index - 1, true); }
+    else if (e.key === "]") { select(index + 1, true); }
+    else if (/^[1-9]$/.test(e.key)) {
+      var i = parseInt(e.key, 10) - 1;
+      if (i < demos.length) select(i, true);
+    }
+  });
+
+  fetch("demos.json", { cache: "no-cache" })
+    .then(function (r) {
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return r.json();
+    })
+    .then(function (data) {
+      manifest = data;
+      demos = data.demos;
+      buildRail();
+      var hash = location.hash.replace(/^#/, "");
+      var start = demos.findIndex(function (d) { return d.id === hash; });
+      select(start >= 0 ? start : 0, false);
+    })
+    .catch(function (err) {
+      els.title.textContent = "Could not load the demo list";
+      els.blurb.textContent =
+        "demos.json did not load (" + err.message + "). If you are viewing this " +
+        "file directly from disk, serve the folder over HTTP instead: python3 -m http.server";
+    });
+})();
+</script>
+
+</body>
+</html>
