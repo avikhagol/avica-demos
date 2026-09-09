@@ -55,6 +55,17 @@ without touching the recordings themselves. Each demo displays its true runtime
 next to the playback length, since how long a real reduction takes is itself
 worth knowing.
 
+## Sample data
+
+Demos 04–09 need a VLBI FITS-IDI dataset. The sample used in these recordings
+is hosted separately (not in this repo, to keep it small):
+
+```bash
+curl -L "https://cloud.ia.forth.gr/index.php/s/kiBDyJ7Wg97rtEC/download" -o files.zip && unzip files.zip -d avica_test_data
+```
+
+This is also shown on the live page itself, under "What the demos assume."
+
 ## Local preview
 
 The page fetches `demos.json` and the casts over HTTP, so opening `index.html`

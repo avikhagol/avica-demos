@@ -36,17 +36,16 @@
       AVICA takes raw VLBI FITS-IDI files through a complete calibration reduction —
       preprocessing, conversion to a Measurement Set, phase shifting, averaging, SNR
       estimation and rPICARD calibration — driven by one configuration file.
-      <strong>The nine recordings below are the real terminal sessions</strong>, not slides.
+      <strong>The Demo below are the real terminal sessions</strong>, not slides.
     </p>
 
     <div class="install">
       <div class="install__bar">
         <span>Install the full stack</span>
-        <button class="copy" type="button" data-copy="curl -fsSL https://raw.githubusercontent.com/avikhagol/avica/main/install.sh -o install.sh&#10;bash install.sh&#10;source &quot;$HOME/.local/share/avica-stack/env.sh&quot;">Copy</button>
+        <button class="copy" type="button" data-copy="curl -LsSf https://avikhagol.github.io/avica/install.sh | bash">Copy</button>
       </div>
-<pre><span class="p">$</span> curl -fsSL https://raw.githubusercontent.com/avikhagol/avica/main/install.sh -o install.sh
-<span class="p">$</span> bash install.sh
-<span class="p">$</span> source "$HOME/.local/share/avica-stack/env.sh"</pre>
+<pre><span class="p">$</span> curl -LsSf https://avikhagol.github.io/avica/install.sh | bash</pre>
+      <p class="install__fallback">Pages unreachable? <code>curl -LsSf https://raw.githubusercontent.com/avikhagol/avica/main/install.sh | bash</code></p>
     </div>
   </section>
 
@@ -64,7 +63,7 @@
     <div class="console__inner">
 
       <aside>
-        <h2 class="rail__title">Nine recordings</h2>
+        <h2 class="rail__title">AVICA Demo</h2>
         <p class="rail__sub">In order, installation through to reading results.</p>
         <div id="rail"></div>
       </aside>
@@ -118,12 +117,23 @@
       </dl>
       <dl class="req">
         <dt>Data</dt>
-        <dd>A VLBI FITS-IDI dataset (<code>.uvfits</code>). Demos 01–03 need no data at all — follow those on any machine.</dd>
+        <dd>A VLBI FITS-IDI dataset (<code>.uvfits</code>). Demos 01–03 need no data at all — follow those on any machine. Grab the sample dataset below for 04–09.</dd>
       </dl>
       <dl class="req">
         <dt>Configuration</dt>
         <dd>A single <code>avica.inp</code> file of <code>key=value</code> entries in your working directory. Demo 03 builds one from scratch.</dd>
       </dl>
+    </div>
+
+    <p class="reqs__lede">To follow demos 04–09 with real data instead of just watching, download the
+      sample FITS-IDI dataset used in these recordings:</p>
+
+    <div class="install install--data">
+      <div class="install__bar">
+        <span>Sample data for demos 04–09</span>
+        <button class="copy" type="button" data-copy="curl -L &quot;https://cloud.ia.forth.gr/index.php/s/kiBDyJ7Wg97rtEC/download&quot; -o files.zip &amp;&amp; unzip files.zip -d avica_test_data">Copy</button>
+      </div>
+<pre><span class="p">$</span> curl -L "https://cloud.ia.forth.gr/index.php/s/kiBDyJ7Wg97rtEC/download" -o files.zip &amp;&amp; unzip files.zip -d avica_test_data</pre>
     </div>
   </section>
 

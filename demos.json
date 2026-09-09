@@ -21,17 +21,17 @@
       "title": "Installation",
       "group": "Getting started",
       "blurb": "One script installs the whole stack -- AVICA, CASA and rPICARD -- and reuses an existing rPICARD if it finds one.",
-      "command": "curl -fsSL https://raw.githubusercontent.com/avikhagol/avica/main/install.sh -o install.sh\nbash install.sh",
+      "command": "curl -LsSf https://avikhagol.github.io/avica/install.sh | bash",
       "data": false,
       "cast": "casts/01_installation.cast",
       "cols": 200,
       "rows": 50,
-      "rawSeconds": 56.6,
-      "rawClock": "0:57",
-      "playClock": "0:43",
-      "posterAt": "0:28",
+      "rawSeconds": 57.6,
+      "rawClock": "0:58",
+      "playClock": "0:44",
+      "posterAt": "0:29",
       "trimmed": true,
-      "bytes": 22503
+      "bytes": 22923
     },
     {
       "id": "02_cli_tour",

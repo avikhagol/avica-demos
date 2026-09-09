@@ -53,7 +53,7 @@ CATALOG = {
         "group": "Getting started",
         "blurb": "One script installs the whole stack -- AVICA, CASA and rPICARD -- "
                  "and reuses an existing rPICARD if it finds one.",
-        "command": "curl -fsSL https://raw.githubusercontent.com/avikhagol/avica/main/install.sh -o install.sh\nbash install.sh",
+        "command": "curl -LsSf https://avikhagol.github.io/avica/install.sh | bash",
         "data": False,
     },
     "02_cli_tour": {
