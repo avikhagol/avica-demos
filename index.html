@@ -129,9 +129,10 @@
     <div class="install install--data">
       <div class="install__bar">
         <span>Sample data for demos 04–09</span>
-        <button class="copy" type="button" data-copy="curl -L &quot;https://cloud.ia.forth.gr/index.php/s/kiBDyJ7Wg97rtEC/download&quot; -o files.zip &amp;&amp; unzip files.zip -d avica_test_data">Copy</button>
+        <button class="copy" type="button" data-copy="url=&quot;https://cloud.ia.forth.gr/index.php/s/kiBDyJ7Wg97rtEC/download&quot;&#10;curl -L &quot;$url&quot; -o files.zip &amp;&amp; unzip files.zip -d avica_test_data">Copy</button>
       </div>
-<pre><span class="p">$</span> curl -L "https://cloud.ia.forth.gr/index.php/s/kiBDyJ7Wg97rtEC/download" -o files.zip &amp;&amp; unzip files.zip -d avica_test_data</pre>
+<pre><span class="p">$</span> url="https://cloud.ia.forth.gr/index.php/s/kiBDyJ7Wg97rtEC/download"
+<span class="p">$</span> curl -L "$url" -o files.zip &amp;&amp; unzip files.zip -d avica_test_data</pre>
     </div>
   </section>
 
