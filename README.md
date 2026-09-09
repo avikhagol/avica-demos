@@ -37,6 +37,16 @@ git add -A && git commit -m "Update demo recordings" && git push
 `sync_casts.py` copies the casts in, reads each header for its geometry, and
 measures both the raw duration and the idle-compressed playback duration, so
 the timings shown on the page can never drift from the actual recordings.
+
+The copy-paste command shown under each demo's player is extracted the same
+way: the script decodes what the recording actually printed and picks the one
+typed line matching that demo's `COMMAND_PATTERN` in the script. Nothing is
+hand-typed, so a real filename or target name from whatever machine recorded
+the demo shows up on the page exactly as typed — not a generic placeholder.
+Adding a tenth demo means adding a `COMMAND_PATTERN` entry that uniquely
+matches the one line you want shown; the script raises loudly if no line in a
+recording matches its pattern, rather than silently keeping a stale command.
+
 Run `python3 scripts/sync_casts.py --help` for the options, or `--dry-run` to
 preview without writing.
 

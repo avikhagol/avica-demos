@@ -4,8 +4,13 @@
 The site (index.html) renders itself entirely from demos.json, so adding or
 re-recording a demo never requires editing HTML by hand -- re-run this script.
 
-Durations are computed from the cast files themselves, so the numbers shown on
-the page can never drift from the actual recordings.
+Durations, and the copy-paste command shown under each player, are both read
+out of the cast files themselves -- neither can drift from what the recording
+actually shows. The command is found by decoding the recording's real output
+and picking the one typed line that matches that demo's COMMAND_PATTERN (see
+below); it is never hand-typed, so a real filename or target name recorded on
+someone else's machine appears on the page exactly as typed, not as a
+generic placeholder like "scan1.uvfits".
 
 Typical use
 -----------
@@ -20,14 +25,17 @@ Typical use
 
 Adding a tenth demo
 -------------------
-Record it, then add an entry to CATALOG below keyed by the cast's stem
-(e.g. "10_imaging"), and re-run this script.
+Record it, add an entry to CATALOG below keyed by the cast's stem (e.g.
+"10_imaging"), give it a COMMAND_PATTERN entry that uniquely matches the one
+line in the recording you want shown (see the comment above COMMAND_PATTERN),
+then re-run this script.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import re
 import shutil
 import sys
 from pathlib import Path
@@ -46,21 +54,20 @@ GROUPS = [
     ("Running the pipeline", "Needs FITS-IDI data, CASA and rPICARD."),
 ]
 
-# Curated per-demo metadata. Durations and file sizes are measured, not stored.
+# Curated per-demo metadata. Durations, file sizes, and the displayed command
+# are all measured from the cast -- nothing here is a command to display as-is.
 CATALOG = {
     "01_installation": {
         "title": "Installation",
         "group": "Getting started",
         "blurb": "One script installs the whole stack -- AVICA, CASA and rPICARD -- "
                  "and reuses an existing rPICARD if it finds one.",
-        "command": "curl -LsSf https://avikhagol.github.io/avica/install.sh | bash",
         "data": False,
     },
     "02_cli_tour": {
         "title": "CLI Tour",
         "group": "Getting started",
         "blurb": "Every top-level command and what its --help tells you.",
-        "command": "avica --help",
         "data": False,
     },
     "03_configuration": {
@@ -68,7 +75,6 @@ CATALOG = {
         "group": "Getting started",
         "blurb": "Build an avica.inp, then use --summary to see every resolved "
                  "parameter and which layer it came from.",
-        "command": "avica pipe config --summary --inpfile avica.inp",
         "data": False,
     },
     "04_fitsidi_check": {
@@ -76,7 +82,6 @@ CATALOG = {
         "group": "Inspecting data",
         "blurb": "Scan a FITS-IDI file for known defects per HDU, and apply the "
                  "fixes that are available.",
-        "command": "avica fitsidi_check scan1.uvfits --fix --desc",
         "data": True,
     },
     "05_listobs": {
@@ -84,7 +89,6 @@ CATALOG = {
         "group": "Inspecting data",
         "blurb": "Print the observation metadata -- sources, antennas, scans, "
                  "frequency setup -- straight from the FITS-IDI.",
-        "command": "avica listobs scan1.uvfits",
         "data": True,
     },
     "06_pipeline_run": {
@@ -92,7 +96,6 @@ CATALOG = {
         "group": "Running the pipeline",
         "blurb": "The complete nine-step reduction end to end, from raw FITS-IDI "
                  "through to the rPICARD calibration.",
-        "command": "avica pipe run --fitsfilenames scan1.uvfits,scan2.uvfits --target J1234+5678",
         "data": True,
     },
     "07_pipeline_steps": {
@@ -100,7 +103,6 @@ CATALOG = {
         "group": "Running the pipeline",
         "blurb": "Name the steps you want and run only those -- useful while "
                  "tuning one stage of a reduction.",
-        "command": "avica pipe run preprocess_fitsidi fits_to_ms --fitsfilenames scan1.uvfits",
         "data": True,
     },
     "08_resume": {
@@ -108,7 +110,6 @@ CATALOG = {
         "group": "Running the pipeline",
         "blurb": "Pick up an interrupted reduction where it stopped with --resume, "
                  "or rewind to a chosen step with --resume-from.",
-        "command": "avica pipe run --resume --target J1234+5678",
         "data": True,
     },
     "09_result": {
@@ -116,10 +117,106 @@ CATALOG = {
         "group": "Running the pipeline",
         "blurb": "The progress ladder, failure panels, full retry history and the "
                  "one-line view built for CI.",
-        "command": "avica pipe result --target J1234+5678",
         "data": True,
     },
 }
+
+# Regex (re.fullmatch) picking the one typed line to display as the copy-paste
+# command, out of every line the recording shows after its "❯ " prompt (both
+# run() and show() print that same prompt -- see demos/lib/helpers.sh). Each
+# pattern is written to match exactly one demo's real invocation shape and
+# reject every other command shown in that same recording. When a demo shows
+# more than one candidate line, the FIRST one in playback order that matches
+# wins, so pattern order only matters relative to the recording, never to this
+# dict.
+COMMAND_PATTERN = {
+    "01_installation": r"curl -LsSf https://\S+/install\.sh \| bash",
+    "02_cli_tour": r"avica --help",
+    "03_configuration": r"avica pipe config --summary --inpfile \S+",
+    "04_fitsidi_check": r"avica fitsidi_check --fix \S+",
+    "05_listobs": r"avica listobs \S+",
+    "06_pipeline_run": (
+        r"avica pipe run\s{2,}--fitsfilenames\s+\S+"
+        r"\s{2,}--target\s+\S+\s{2,}--configfile\s+\S+"
+    ),
+    "07_pipeline_steps": (
+        r"avica pipe run(?: [a-zA-Z_]\w*)+\s{2,}--fitsfilenames\s+\S+"
+        r"\s{2,}--target\s+\S+\s{2,}--configfile\s+\S+"
+    ),
+    "08_resume": (
+        r"avica pipe run --resume\s{2,}--fitsfilenames\s+\S+"
+        r"\s{2,}--target\s+\S+\s{2,}--configfile\s+\S+"
+    ),
+    "09_result": r"avica pipe result --target \S+ --configfile \S+",
+}
+
+# Strips terminal control sequences (color codes, cursor moves, the resize/
+# clear codes at the top of every recording) so the decoded text is plain
+# characters only.
+ANSI_RE = re.compile(r"\x1b\[[0-9;]*[A-Za-z]|\x1b\][^\x07]*\x07")
+
+# Every command the demos print is typed after this prompt (see run()/show()
+# in demos/lib/helpers.sh) -- both functions use the identical glyph, so a
+# "❯ "-prefixed line is "something that was actually typed on screen",
+# regardless of whether that particular line was really executed or only
+# illustrated. Either way its filenames and target names are real: bash
+# expands $FITS/$TARGET into the string before run()/show() ever see it.
+PROMPT = "❯ "  # U+276F HEAVY RIGHT-POINTING ANGLE QUOTATION MARK ORNAMENT
+
+# A .uvfits path a demo recording happened to type with its local absolute
+# directory (e.g. because that machine's env.sh pointed AVICA_FITS_FILE at a
+# full path) is not something a visitor can paste -- only the filename means
+# anything on their machine. Collapse any such path to its basename.
+UVFITS_PATH_RE = re.compile(r"(?:\S*/)+([^\s,/]+\.uvfits)")
+
+
+def decode_cast_text(path: Path) -> str:
+    """Concatenate every terminal-output ("o") event's payload, in order."""
+    chunks: list[str] = []
+    with path.open(encoding="utf-8", errors="replace") as fh:
+        fh.readline()  # header
+        for line in fh:
+            line = line.strip()
+            if not line.startswith("["):
+                continue
+            try:
+                event = json.loads(line)
+            except ValueError:
+                continue
+            if len(event) >= 2 and event[1] == "o":
+                chunks.append(str(event[2]))
+    return "".join(chunks)
+
+
+def typed_commands(cast_text: str) -> list[str]:
+    """Every line the recording shows right after its "❯ " prompt, in order."""
+    clean = ANSI_RE.sub("", cast_text).replace("\r\n", "\n").replace("\r", "")
+    return [
+        line[len(PROMPT):]
+        for line in clean.split("\n")
+        if line.startswith(PROMPT)
+    ]
+
+
+def extract_command(cast: Path, stem: str) -> str:
+    """The one real command to show under this demo's player.
+
+    Decodes what the recording actually printed and returns the first typed
+    line matching this demo's COMMAND_PATTERN -- i.e. the literal text a
+    viewer would see if they watched the recording themselves, filenames and
+    target names included. Raises if no line matches, since a silently stale
+    or blank command is worse than a loud failure at build time.
+    """
+    pattern = COMMAND_PATTERN.get(stem)
+    if pattern is None:
+        raise KeyError(f"no COMMAND_PATTERN entry for {stem!r}")
+    for line in typed_commands(decode_cast_text(cast)):
+        if re.fullmatch(pattern, line):
+            return UVFITS_PATH_RE.sub(r"\1", line)
+    raise ValueError(
+        f"{cast.name}: no typed line matched COMMAND_PATTERN[{stem!r}] "
+        f"({pattern!r}) -- the recording changed shape, or the pattern needs updating"
+    )
 
 
 def parse_cast(path: Path) -> dict:
@@ -199,7 +296,7 @@ def main(argv: list[str] | None = None) -> int:
             "title": meta["title"],
             "group": meta["group"],
             "blurb": meta["blurb"],
-            "command": meta["command"],
+            "command": extract_command(cast, stem),
             "data": meta["data"],
             "cast": f"casts/{cast.name}",
             "cols": info["header"].get("width", 200),
