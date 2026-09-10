@@ -132,7 +132,8 @@
         <button class="copy" type="button" data-copy="url=&quot;https://cloud.ia.forth.gr/index.php/s/kiBDyJ7Wg97rtEC/download&quot;&#10;curl -L &quot;$url&quot; -o files.zip &amp;&amp; unzip files.zip -d avica_test_data">Copy</button>
       </div>
 <pre><span class="p">$</span> url="https://cloud.ia.forth.gr/index.php/s/kiBDyJ7Wg97rtEC/download"
-<span class="p">$</span> curl -L "$url" -o files.zip &amp;&amp; unzip files.zip -d avica_test_data</pre>
+<span class="p">$</span> curl -L "$url" -o files.zip &amp;&amp; unzip files.zip -d avica_test_data
+<span class="p">$</span> avica pipe config folder_for_fits="$(readlink -f .)"/avica_test_data/for-demo-fitsfiles/</pre>
     </div>
   </section>
 
