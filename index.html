@@ -94,6 +94,20 @@
     --configfile avica.inp</pre>
         </div>
       </li>
+
+      <li class="step">
+        <h3 class="step__title">Sample data</h3>
+        <p class="step__hint detail">No FITS files of your own? Grab the set used in the demos below.</p>
+        <div class="install install--data">
+          <div class="install__bar">
+            <span>Download sample FITS-IDI dataset</span>
+            <button class="copy" type="button" data-copy="url=&quot;https://cloud.ia.forth.gr/index.php/s/kiBDyJ7Wg97rtEC/download&quot;&#10;curl -L &quot;$url&quot; -o files.zip &amp;&amp; unzip files.zip -d avica_test_data">Copy</button>
+          </div>
+<pre><span class="p">$</span> url="https://cloud.ia.forth.gr/index.php/s/kiBDyJ7Wg97rtEC/download"
+<span class="p">$</span> curl -L "$url" -o files.zip &amp;&amp; unzip files.zip -d avica_test_data
+<span class="p">$</span> avica pipe config folder_for_fits="$(readlink -f .)"/avica_test_data/for-demo-fitsfiles/</pre>
+        </div>
+      </li>
     </ol>
 
     <div class="chain detail">
@@ -164,25 +178,12 @@
       </dl>
       <dl class="req">
         <dt>Data</dt>
-        <dd>A VLBI FITS-IDI dataset (<code>.uvfits</code>). Demos 01–03 need no data at all — follow those on any machine. Grab the sample dataset below for 04–09.</dd>
+        <dd>A VLBI FITS-IDI dataset (<code>.uvfits</code>). Demos 01–03 need no data at all — follow those on any machine. Grab the sample dataset above for 04–09.</dd>
       </dl>
       <dl class="req">
         <dt>Configuration</dt>
         <dd>A single <code>avica.inp</code> file of <code>key=value</code> entries in your working directory. Demo 03 builds one from scratch.</dd>
       </dl>
-    </div>
-
-    <p class="reqs__lede">To follow demos 04–09 with real data instead of just watching, download the
-      sample FITS-IDI dataset used in these recordings:</p>
-
-    <div class="install install--data">
-      <div class="install__bar">
-        <span>Sample data for demos 04–09</span>
-        <button class="copy" type="button" data-copy="url=&quot;https://cloud.ia.forth.gr/index.php/s/kiBDyJ7Wg97rtEC/download&quot;&#10;curl -L &quot;$url&quot; -o files.zip &amp;&amp; unzip files.zip -d avica_test_data">Copy</button>
-      </div>
-<pre><span class="p">$</span> url="https://cloud.ia.forth.gr/index.php/s/kiBDyJ7Wg97rtEC/download"
-<span class="p">$</span> curl -L "$url" -o files.zip &amp;&amp; unzip files.zip -d avica_test_data
-<span class="p">$</span> avica pipe config folder_for_fits="$(readlink -f .)"/avica_test_data/for-demo-fitsfiles/</pre>
     </div>
   </section>
 
@@ -212,6 +213,9 @@
 (function () {
   "use strict";
 
+  var COMPACT_DEMO_IDS = ["03_configuration", "06_pipeline_run", "09_result"];
+  var manifest = null, demos = [], index = 0, player = null;
+
   (function initView() {
     var KEY = "avica-view";
     var saved = null;
@@ -226,6 +230,11 @@
         btn.setAttribute("aria-pressed", btn.dataset.viewBtn === v ? "true" : "false");
       });
       try { localStorage.setItem(KEY, v); } catch (e) {}
+
+      if (v === "compact" && demos.length && !COMPACT_DEMO_IDS.includes(demos[index].id)) {
+        var idx = demos.findIndex(function (d) { return COMPACT_DEMO_IDS.includes(d.id); });
+        if (idx >= 0) select(idx, false);
+      }
     }
 
     buttons.forEach(function (btn) {
@@ -249,8 +258,6 @@
     next: document.getElementById("s-next"),
     mount: document.getElementById("player")
   };
-
-  var manifest = null, demos = [], index = 0, player = null;
 
   function flash(btn, text) {
     var was = btn.textContent;
@@ -295,6 +302,9 @@
 
       var sec = document.createElement("section");
       sec.className = "rail__group";
+      if (!members.some(function (d) { return COMPACT_DEMO_IDS.includes(d.id); })) {
+        sec.className += " detail";
+      }
 
       var label = document.createElement("p");
       label.className = "rail__glabel";
@@ -311,6 +321,7 @@
 
       members.forEach(function (demo) {
         var li = document.createElement("li");
+        if (!COMPACT_DEMO_IDS.includes(demo.id)) li.className = "detail";
         var btn = document.createElement("button");
         btn.type = "button";
         btn.className = "demo";
@@ -419,6 +430,7 @@
       buildRail();
       var hash = location.hash.replace(/^#/, "");
       var start = demos.findIndex(function (d) { return d.id === hash; });
+      if (start < 0) start = demos.findIndex(function (d) { return COMPACT_DEMO_IDS.includes(d.id); });
       select(start >= 0 ? start : 0, false);
     })
     .catch(function (err) {
