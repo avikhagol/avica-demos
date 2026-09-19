@@ -8,7 +8,7 @@
 <meta property="og:title" content="AVICA Demos">
 <meta property="og:description" content="Nine terminal recordings of the AVICA VLBI pipeline, from installation to reading pipeline results.">
 <meta property="og:type" content="website">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230c141c'/%3E%3Cpath d='M7 21.5 12.2 10h2.1l5.2 11.5h-2.3l-1.2-2.8h-5.4l-1.2 2.8H7Zm4.4-4.7h3.8l-1.9-4.4-1.9 4.4Z' fill='%23e8a33d'/%3E%3Ccircle cx='23.5' cy='12' r='2' fill='%2363b4d4'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23050607'/%3E%3Cpath d='M7 21.5 12.2 10h2.1l5.2 11.5h-2.3l-1.2-2.8h-5.4l-1.2 2.8H7Zm4.4-4.7h3.8l-1.9-4.4-1.9 4.4Z' fill='%23ff4d4f'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="assets/asciinema-player.css">
 <link rel="stylesheet" href="assets/style.css">
@@ -18,12 +18,18 @@
 <header class="masthead">
   <div class="masthead__inner">
     <a class="wordmark" href="./"><b>AVICA</b> <span>Demos</span></a>
-    <nav class="masthead__links">
-      <a href="#demos">Demos</a>
-      <a href="https://avica.readthedocs.io/en/latest/">Docs</a>
-      <a href="https://pypi.org/project/avica/">PyPI</a>
-      <a href="https://github.com/avikhagol/avica">GitHub</a>
-    </nav>
+    <div class="masthead__group">
+      <nav class="masthead__links">
+        <a href="#demos">Demos</a>
+        <a href="https://avica.readthedocs.io/en/latest/">Docs</a>
+        <a href="https://pypi.org/project/avica/">PyPI</a>
+        <a href="https://github.com/avikhagol/avica">GitHub</a>
+      </nav>
+      <div class="view-toggle" role="group" aria-label="Detail level">
+        <button type="button" class="view-toggle__btn" data-view-btn="compact" aria-pressed="true">Compact</button>
+        <button type="button" class="view-toggle__btn" data-view-btn="full" aria-pressed="false">Full</button>
+      </div>
+    </div>
   </div>
 </header>
 
@@ -32,28 +38,71 @@
   <section class="wrap hero">
     <a href="https://doi.org/10.1051/0004-6361/202660469"><p class="hero__badge">Accepted for publication in Astronomy &amp; Astrophysics</p></a>
     <h1>Automated VLBI pipeline <em>in CASA</em></h1>
-    <p class="hero__lede">
+    <p class="hero__lede detail">
       Uses minimal configuration to run blind-automated VLBI calibration.
-      <strong>The Demo below are the real terminal sessions</strong>.
+      <strong>The demos below are the real terminal sessions</strong>.
     </p>
 
-    <div class="install">
-      <div class="install__bar">
-        <span>Install the full stack</span>
-        <button class="copy" type="button" data-copy="curl -LsSf https://avikhagol.github.io/avica/install.sh | bash">Copy</button>
-      </div>
-<pre><span class="p">$</span> curl -LsSf https://avikhagol.github.io/avica/install.sh | bash</pre>
-      <!--<p class="install__fallback">Pages unreachable? <code>curl -LsSf https://raw.githubusercontent.com/avikhagol/avica/main/install.sh | bash</code></p>-->
+    <div class="banner">
+      <span class="banner__icon" aria-hidden="true">&#9889;</span>
+      <p class="banner__text"><strong>No learning curve. No user input.</strong> Just the FITS file and the target name — that's it.</p>
     </div>
   </section>
 
-  <section class="wrap chain">
-    <div class="chain__head">
+  <section class="wrap quickstart">
+    <div class="quickstart__head">
       <p class="eyebrow">AVICA</p>
-      <p>Pipeline steps, run end to end or named individually.</p>
+      <h2>Automated VLBI pipeline <em>in CASA</em></h2>
     </div>
-    <div class="chain__steps">
-      <code>preprocess_fitsidi</code><i>→</i><code>fits_to_ms</code><i>→</i><code>avica_avg</code><i>→</i><code>avicameta_ms</code><i>→</i><code>avica_snr</code><i>→</i><code>avica_fill_input</code><i>→</i><code>avica_split_ms</code><i>→</i><code>rpicard</code>
+
+    <ol class="steps">
+      <li class="step">
+        <h3 class="step__title"><span class="step__n">1</span> Installation</h3>
+        <p class="step__hint detail">The complete stack: AVICA, CASA and rPICARD — one script, reuses an existing rPICARD if it finds one.</p>
+        <div class="install">
+          <div class="install__bar">
+            <span>bash</span>
+            <button class="copy" type="button" data-copy="curl -LsSf https://avikhagol.github.io/avica/install.sh | bash">Copy</button>
+          </div>
+<pre><span class="p">$</span> curl -LsSf https://avikhagol.github.io/avica/install.sh | bash</pre>
+        </div>
+      </li>
+
+      <li class="step">
+        <h3 class="step__title"><span class="step__n">2</span> Create configuration</h3>
+        <p class="step__hint detail">Point it at a folder of FITS files. Everything else resolves to sane defaults.</p>
+        <div class="install">
+          <div class="install__bar">
+            <span>bash</span>
+            <button class="copy" type="button" data-copy="avica pipe config folder_for_fits=/path/to/fitsfile/folder">Copy</button>
+          </div>
+<pre><span class="p">$</span> avica pipe config folder_for_fits=/path/to/fitsfile/folder</pre>
+        </div>
+      </li>
+
+      <li class="step">
+        <h3 class="step__title"><span class="step__n">3</span> Run full pipeline</h3>
+        <p class="step__hint detail">Name the target and the FITS files, point at the config, and run.</p>
+        <div class="install">
+          <div class="install__bar">
+            <span>bash</span>
+            <button class="copy" type="button" data-copy="avica pipe run --fitsfilenames VLBA_VSN001024_file28.uvfits,VLBA_VSN001024_file29.uvfits,VLBA_VSN001024_file30.uvfits --target 1309+555 --configfile avica.inp">Copy</button>
+          </div>
+<pre><span class="p">$</span> avica pipe run \
+    --fitsfilenames VLBA_VSN001024_file28.uvfits,VLBA_VSN001024_file29.uvfits,VLBA_VSN001024_file30.uvfits \
+    --target 1309+555 \
+    --configfile avica.inp</pre>
+        </div>
+      </li>
+    </ol>
+
+    <div class="chain detail">
+      <div class="chain__head">
+        <p>Under the hood, run end to end or named individually.</p>
+      </div>
+      <div class="chain__steps">
+        <code>preprocess_fitsidi</code><i>→</i><code>fits_to_ms</code><i>→</i><code>avica_avg</code><i>→</i><code>avicameta_ms</code><i>→</i><code>avica_snr</code><i>→</i><code>avica_fill_input</code><i>→</i><code>avica_split_ms</code><i>→</i><code>rpicard</code>
+      </div>
     </div>
   </section>
 
@@ -101,7 +150,7 @@
     </div>
   </section>
 
-  <section class="wrap reqs">
+  <section class="wrap reqs detail">
     <p class="eyebrow">Before you start</p>
     <h2>What the demos assume</h2>
     <div class="reqs__grid">
@@ -144,12 +193,12 @@
       <a href="https://pypi.org/project/avica/">Install from PyPI</a>
       <a href="https://github.com/avikhagol/avica/blob/main/install.sh">install.sh</a>
     </div>
-    <p>
+    <p class="detail">
       Recorded with <a href="https://asciinema.org">asciinema</a> and played back with
       asciinema-player. Long idle gaps are compressed during playback; each recording
       shows its true wall-clock runtime above the terminal.
     </p>
-    <p>
+    <p class="detail">
       AVICA was developed within the “Search for Milli-Lenses” (SMILE) project, which has
       received funding from the European Research Council (ERC) under the HORIZON ERC
       Grants 2021 programme, grant agreement No. 101040021.
@@ -162,6 +211,29 @@
 <script>
 (function () {
   "use strict";
+
+  (function initView() {
+    var KEY = "avica-view";
+    var saved = null;
+    try { saved = localStorage.getItem(KEY); } catch (e) {}
+    var view = saved === "full" ? "full" : "compact";
+    var buttons = document.querySelectorAll("[data-view-btn]");
+
+    function apply(v) {
+      view = v;
+      document.documentElement.setAttribute("data-view", v);
+      buttons.forEach(function (btn) {
+        btn.setAttribute("aria-pressed", btn.dataset.viewBtn === v ? "true" : "false");
+      });
+      try { localStorage.setItem(KEY, v); } catch (e) {}
+    }
+
+    buttons.forEach(function (btn) {
+      btn.addEventListener("click", function () { apply(btn.dataset.viewBtn); });
+    });
+
+    apply(view);
+  })();
 
   var els = {
     rail: document.getElementById("rail"),
